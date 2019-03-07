@@ -1,0 +1,6 @@
+PKGNAME=@NAME@
+PKGSEC=spiral
+PKGDEP="@DEPS@"
+PKGDES="@DESC@"
+
+ABHOST=noarch

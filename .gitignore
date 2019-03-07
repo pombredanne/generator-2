@@ -1,0 +1,11 @@
+# Temporary files
+abbs
+
+# Repo
+repo
+
+# Virtual env
+venv
+
+# IDEA
+.idea

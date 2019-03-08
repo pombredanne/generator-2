@@ -9,10 +9,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-HTTP = urllib3.PoolManager()
+HTTP = urllib3.PoolManager(cert_reqs='CERT_REQUIRED')
 
 TEMPLATE_DIR = 'template'
-OUTPUT_ABBS = 'abbs'
+OUTPUT_ABBS = 'TREE'
 KEYS_NECESSARY = ['name', 'deps']
 REPOLOGY_ENDPOINT = 'https://repology.org/api/v1/project/%s'
 
@@ -57,7 +57,6 @@ def autobuild_generate(src_file):
             dest_file_content = dest_file_content.replace('@DEPS@', pkg_dep)
             dest_file_content = dest_file_content.replace('@DESC@', pkg_desc)
             dest_file_content = dest_file_content.replace('@VER@', pkg_ver)
-            print(dest_file_content)
             with open(dest_file_name, 'w') as f:
                 f.write(dest_file_content)
     return
@@ -74,10 +73,12 @@ def generate(repo_location):
             with open(path + name) as f:
                 try:
                     autobuild_generate(f)
+                    logger.info('%s generated' % name)
                 except ValueError as e:
                     logger.error('%s omitted, %s' % (name, e))
                     continue
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
     generate('repo/packages/')

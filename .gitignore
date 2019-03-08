@@ -1,8 +1,12 @@
 # Temporary files
-abbs
+TREE
 
 # Repo
 repo
+
+# Build directories
+.ciel
+OUTPUT
 
 # Virtual env
 venv

@@ -13,3 +13,6 @@ venv
 
 # IDEA
 .idea
+
+# Webhook listener configuration
+trigger.yaml

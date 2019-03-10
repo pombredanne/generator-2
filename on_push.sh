@@ -6,6 +6,6 @@ pushd repo
 git pull
 popd
 
-sudo rm -Rf TREE OUTPUT
+sudo rm -Rf TREE
 venv/bin/python3 generate.py
 bash -c ./build.sh

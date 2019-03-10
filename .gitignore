@@ -16,3 +16,6 @@ venv
 
 # Webhook listener configuration
 trigger.yaml
+
+# Version cache
+versions.json

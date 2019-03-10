@@ -14,7 +14,34 @@ HTTP = urllib3.PoolManager(cert_reqs='CERT_REQUIRED')
 TEMPLATE_DIR = 'template'
 OUTPUT_ABBS = 'TREE'
 KEYS_NECESSARY = ['name', 'deps']
+VERSION_LOG = 'versions.json'
 REPOLOGY_ENDPOINT = 'https://repology.org/api/v1/project/%s'
+
+VERSIONS = dict()
+
+
+def check_version(version):
+    if version['method'] == 'static':
+        return version['static']
+    elif version['method'] == 'repology':
+        r = HTTP.request('GET', REPOLOGY_ENDPOINT % version['repology'])
+        api_response = json.loads(r.data.decode('utf-8'))
+        if 'distro' in version.keys():
+            distro = version['distro']
+        else:
+            distro = 'debian_testing'
+        latest_ver = ''
+        for package in api_response:
+            if package['repo'] == distro:
+                return package['version']
+            if package['status'] == 'newest':
+                latest_ver = package['version']
+        if latest_ver:
+            return latest_ver
+        else:
+            raise ValueError('unable to obtain version info from repology')
+    else:
+        return '9999'
 
 
 def autobuild_generate(src_file):
@@ -26,24 +53,14 @@ def autobuild_generate(src_file):
     pkg_dep = ' '.join(content['deps'])
     pkg_desc = 'Empty package for Debiantai compatibility' + \
                (', ' + content['description'] if 'description' in content.keys() else '')
+    pkg_ver = '9999'
     if 'version' in content.keys():
-        if content['version']['method'] == 'static':
-            pkg_ver = content['version']['']
-        elif content['version']['method'] == 'repology':
-            r = HTTP.request('GET', REPOLOGY_ENDPOINT % content['version']['repology'])
-            api_response = json.loads(r.data.decode('utf-8'))
-            if 'distro' in content['version']:
-                distro = content['version']['distro']
-            else:
-                distro = 'debian_testing'
-            for package in api_response:
-                if package['repo'] == distro:
-                    pkg_ver = package['version']
-                    break
-            if not pkg_ver:
-                raise ValueError('unable to obtain version info from repology')
-        else:
-            pkg_ver = '9999'
+        pkg_ver = check_version(content['version'])
+    if pkg_name in VERSIONS.keys():
+        if pkg_ver == VERSIONS[pkg_name]:
+            logger.info('%s: no updates found, ignoring...')
+            return
+    VERSIONS[pkg_name] = pkg_ver
     dest = OUTPUT_ABBS + '/extra-spiral/' + content['name']
     if os.path.exists(dest):
         shutil.rmtree(dest)
@@ -73,7 +90,7 @@ def generate(repo_location):
             with open(path + name) as f:
                 try:
                     autobuild_generate(f)
-                    logger.info('%s generated' % name)
+                    logger.info('%s prepared' % name)
                 except ValueError as e:
                     logger.error('%s omitted, %s' % (name, e))
                     continue
@@ -81,4 +98,13 @@ def generate(repo_location):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
+    if os.path.exists(VERSION_LOG):
+        with open(VERSION_LOG) as f:
+            try:
+                VERSIONS = json.loads(f.read())
+            except ValueError:
+                logger.error('Invalid version cache, ignoring...')
+                VERSIONS = dict()
     generate('repo/packages/')
+    with open(VERSION_LOG, 'w') as f:
+        f.write(json.dumps(VERSIONS, ensure_ascii=False))

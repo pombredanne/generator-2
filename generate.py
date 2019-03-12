@@ -70,10 +70,10 @@ def autobuild_generate(src_file):
             dest_file_name = path + '/' + name
             with open(dest_file_name) as f:
                 dest_file_content = f.read()
-            dest_file_content = dest_file_content.replace('@NAME@', pkg_name)
-            dest_file_content = dest_file_content.replace('@DEPS@', pkg_dep)
-            dest_file_content = dest_file_content.replace('@DESC@', pkg_desc)
-            dest_file_content = dest_file_content.replace('@VER@', pkg_ver)
+            dest_file_content = dest_file_content.replace('@NAME@', str(pkg_name))
+            dest_file_content = dest_file_content.replace('@DEPS@', str(pkg_dep))
+            dest_file_content = dest_file_content.replace('@DESC@', str(pkg_desc))
+            dest_file_content = dest_file_content.replace('@VER@', str(pkg_ver))
             with open(dest_file_name, 'w') as f:
                 f.write(dest_file_content)
     return

@@ -34,7 +34,6 @@ echo ">>> Dependencies updated"
 
 # Building!
 echo ">>> Starting build process...";
-sudo rm -Rf "${TREE}"; # Since packages are built with root account
 "${PYTHON}" "${GENERATOR}"; # Generate autobuild files
 bash -c "${BUILD_SCRIPT}"; # Build packages from autobuild definitions
 echo ">>> Done!"

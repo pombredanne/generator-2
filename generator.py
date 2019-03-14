@@ -61,6 +61,10 @@ class Generator(object):
             self.versions = dict()
 
     @staticmethod
+    def check_upper(string):
+        return all(map(str.isupper, string))
+
+    @staticmethod
     def check_version(version):
         """
         Get correct version from the source definition
@@ -106,6 +110,10 @@ class Generator(object):
             if pkg_info['VER'] == self.versions[pkg_info['NAME']]:
                 raise NoUpdatesException("no available updates")
         self.versions[pkg_info['NAME']] = pkg_info['VER']
+        # Copy all uppercase keys
+        for key in src.keys():
+            if self.check_upper(key):
+                pkg_info[key] = src[key]
         return pkg_info
 
     def autobuild_generate(self, content):
